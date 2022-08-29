@@ -8,21 +8,21 @@
 using namespace std;
 
 int main(int argc, char** argv){
-    if (argc != 1){
+    if (argc != 2){
         cout << "Quantidade de argumentos invalida, insira apenas o nome do arquivo com o codigo objeto\n" << endl;
         return 0;
     }
 
     fileData * input_file = new fileData{ .name=argv[1]};
     fileData * output_file = new fileData{ .name="saida.asm"};
-    std::vector<std::vector<int>> * matrix;
+    std::vector<int> matrix;
     
-    ifstream ifs(argv[2]);
+    ifstream ifs(argv[1]);
     stringstream buffer;
     buffer << ifs.rdbuf();
     input_file->content = buffer.str();
 
-    ConvertFileToMatrix(input_file, matrix);
+    matrix = ConvertStringToIntVector(input_file->content);
     ConvertToX86(matrix, output_file);
     SaveFile(output_file);
 

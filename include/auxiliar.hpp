@@ -12,9 +12,7 @@ struct fileData {
     std::string content;
 };
 
-void ConvertFileToMatrix(fileData * file, std::vector<std::vector<int>> * matrix);
-
-void ConvertToX86(std::vector<std::vector<int>> * matrix, fileData * file) ;
+void ConvertToX86(std::vector<int> matrix, fileData * file) ;
 
 void SaveFile(fileData * file);
 

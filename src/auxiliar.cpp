@@ -6,13 +6,15 @@ std::map<int, int> op_size_map = {
     {9, 3}, {10, 2}, {11, 2}, {12, 2}, {13, 2}, {14, 1}, {15, 2}, {16,2}
 };
 
-void ConvertFileToMatrix(fileData * file, std::vector<std::vector<int>> * matrix){
-    std::vector <int> inst = ConvertStringToIntVector(file->content);
-
-
+void ConvertToX86(std::vector<int> matrix, fileData * file) {
+    return;
 }
 
-std::vector <int> ConvertStringToIntVector(std::string text){
+void SaveFile(fileData * file) {
+    return;
+}
+
+std::vector<int> ConvertStringToIntVector(std::string text){
     std::string str;
     std::stringstream ss(text);
     std::vector <int> result;
