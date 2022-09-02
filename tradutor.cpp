@@ -24,7 +24,10 @@ int main(int argc, char** argv){
 
     matrix = ConvertStringToIntVector(input_file->content);
     ConvertToX86(matrix, output_file);
-    SaveFile(output_file);
+
+    ofstream ofs (output_file->name);
+    ofs << output_file->content;
+    ofs.close();
 
     cout << "Arquivo " << argv[1] << " convertido para o arquivo saida.asm" << endl;
 
