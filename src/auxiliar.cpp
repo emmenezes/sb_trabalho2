@@ -11,9 +11,10 @@ void ConvertToX86(std::vector<int> matrix, fileData *file)
     std::vector<std::string> *text = new std::vector<std::string>();
     std::set<int> *labels = new std::set<int>();
 
-    std::map<int, int> data_index;   // [posição na memoria, index]
-    std::map<int, int>::iterator it; // [posição na memoria, index]
     std::vector<varInt> *data = new std::vector<varInt>();
+    std::map<int, int>::iterator it_data; // [posição na memoria, index]
+    std::map<int, int> data_index;        // [posição na memoria, index]
+
     bool end = false;
 
     while (true)
@@ -24,9 +25,9 @@ void ConvertToX86(std::vector<int> matrix, fileData *file)
         {
         case 1: // ADD
             op1 = matrix[i++];
-            instruction.text = "add eax, [d" + std::to_string(op1) + "]";
-            it = data_index.find(op1);
-            if (it == data_index.end())
+            instruction.text = "add \teax, [d" + std::to_string(op1) + "]\n";
+            it_data = data_index.find(op1);
+            if (it_data == data_index.end())
             {
                 varInt var = {op1, false, matrix[op1]};
                 data_index[op1] = data_size;
@@ -36,9 +37,9 @@ void ConvertToX86(std::vector<int> matrix, fileData *file)
             break;
         case 2: // SUB
             op1 = matrix[i++];
-            instruction.text = "sub eax, [d" + std::to_string(op1) + "]";
-            it = data_index.find(op1);
-            if (it == data_index.end())
+            instruction.text = "sub \teax, [d" + std::to_string(op1) + "]\n";
+            it_data = data_index.find(op1);
+            if (it_data == data_index.end())
             {
                 varInt var = {op1, false, matrix[op1]};
                 data_index[op1] = data_size;
@@ -54,28 +55,64 @@ void ConvertToX86(std::vector<int> matrix, fileData *file)
             break;
         case 5: // JMP
             op1 = matrix[i++];
+            instruction.text = "jmp \tl" + std::to_string(op1) + "\n";
+            labels->insert(op1);
             break;
         case 6: // JMPN
             op1 = matrix[i++];
+            instruction.text = "cmp \teax, 0\n\tjl \t\tl" + std::to_string(op1) + "\n";
+            labels->insert(op1);
             break;
         case 7: // JMPP
             op1 = matrix[i++];
+            instruction.text = "cmp \teax, 0\n\tjg \t\tl" + std::to_string(op1) + "\n";
+            labels->insert(op1);
             break;
         case 8: // JPMZ
             op1 = matrix[i++];
+            instruction.text = "cmp \teax, 0\n\tjz \t\tl" + std::to_string(op1) + "\n";
+            labels->insert(op1);
             break;
         case 9: // COPY
             op1 = matrix[i++];
             op2 = matrix[i++];
+            instruction.text = "mov \tebx, [d" + std::to_string(op2) + "]\n\tmov \t[d" + std::to_string(op1) + "], ebx\n";
+
+            it_data = data_index.find(op1);
+            if (it_data == data_index.end())
+            {
+                varInt var = {op1, false, matrix[op1]};
+                data_index[op1] = data_size;
+                data->push_back(var);
+                data_size++;
+            }
+
+            it_data = data_index.find(op2);
+            if (it_data == data_index.end())
+            {
+                varInt var = {op2, false, matrix[op2]};
+                data_index[op2] = data_size;
+                data->push_back(var);
+                data_size++;
+            }
             break;
         case 10: // LOAD
             op1 = matrix[i++];
+            instruction.text = "mov \teax, [d" + std::to_string(op1) + "]\n";
+            it_data = data_index.find(op1);
+            if (it_data == data_index.end())
+            {
+                varInt var = {op1, false, matrix[op1]};
+                data_index[op1] = data_size;
+                data->push_back(var);
+                data_size++;
+            }
             break;
         case 11: // STORE
             op1 = matrix[i++];
-            instruction.text = "mov dword [d" + std::to_string(op1) + "], eax";
-            it = data_index.find(op1);
-            if (it == data_index.end())
+            instruction.text = "mov \tdword [d" + std::to_string(op1) + "], eax\n";
+            it_data = data_index.find(op1);
+            if (it_data == data_index.end())
             {
                 varInt var = {op1, true, matrix[op1]};
                 data_index[op1] = data_size;
@@ -84,7 +121,7 @@ void ConvertToX86(std::vector<int> matrix, fileData *file)
             }
             else
             {
-                (*data)[it->second].isVar = true;
+                (*data)[it_data->second].isVar = true;
             }
             break;
         case 12: // INPUT
@@ -95,7 +132,7 @@ void ConvertToX86(std::vector<int> matrix, fileData *file)
             break;
         case 14: // STOP
             end = true;
-            instruction.text = "fim:\nmov eax, 1\nmov ebx, 0\nint 80h\n";
+            instruction.text = "mov \teax, 1\n\tmov \tebx, 0\n\tint \t80h\n";
             break;
         case 15: // S_INPUT
             op1 = matrix[i++];
@@ -127,17 +164,17 @@ void CreateDataSection(std::vector<varInt> *data, std::string *s_data, std::stri
         {
             if (val)
             {
-                command = 'd' + std::to_string(index) + " resdw " + std::to_string(val*4) + '\n';
+                command = 'd' + std::to_string(index) + "\t\tresdw " + std::to_string(val * 4) + '\n';
             }
             else
             {
-                command = 'd' + std::to_string(index) + " resb 4" + '\n';
+                command = 'd' + std::to_string(index) + "\t\tresb 4" + '\n';
             }
             s_bss->append(command);
         }
         else
         {
-            command = 'd' + std::to_string(index) + " dw " + std::to_string(val) + '\n';
+            command = 'd' + std::to_string(index) + "\t\tdw " + std::to_string(val) + '\n';
             s_data->append(command);
         }
     }
@@ -145,7 +182,24 @@ void CreateDataSection(std::vector<varInt> *data, std::string *s_data, std::stri
 
 void CreateTextSection(std::vector<instr> *instructions, std::set<int> *labels, std::string *s_text)
 {
-    // Primeiro checa as labels e adiciona ao text, depois cria arquivo a partir do text
+    int pos;
+    std::string instruction;
+    std::set<int>::iterator it;
+
+    for (int i = 0; i < instructions->size(); i++)
+    {
+        pos = (*instructions)[i].pos;
+        instruction = (*instructions)[i].text;
+        it = (*labels).find(pos);
+        if (it == (*labels).end())
+        {
+            s_text->append('\t' + instruction);
+        }
+        else
+        {
+            s_text->append('l' + std::to_string(pos) + ":\n\t" + instruction);
+        }
+    }
 }
 
 void SaveFile(std::string *s_text, std::string *s_data, std::string *s_bss, fileData *file)
