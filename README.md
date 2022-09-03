@@ -5,4 +5,12 @@ Equipe:
 * Daniel Erick Sanchez Trujillo - 18/0039229
 * Eduarda Costa de Menezes, Emme - 17/0032353
 
+## Para compilar
+```
+g++ tradutor.cpp src/auxiliar.cpp -o tradutor
+```
 
+## Para executar
+```
+./tradutor teste.in
+```
