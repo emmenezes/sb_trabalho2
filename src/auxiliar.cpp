@@ -2,7 +2,7 @@
 
 void ConvertToX86(std::vector<int> matrix, fileData *file)
 {
-    int i = 0, op1, op2, data_size = 0;
+    int i = 0, op1, op2, data_size = 0, data_str_size = 0;
     std::string *s_text = new std::string();
     std::string *s_data = new std::string();
     std::string *s_bss = new std::string();
@@ -14,6 +14,10 @@ void ConvertToX86(std::vector<int> matrix, fileData *file)
     std::vector<varInt> *data = new std::vector<varInt>();
     std::map<int, int>::iterator it_data; // [posição na memoria, index]
     std::map<int, int> data_index;        // [posição na memoria, index]
+
+    std::vector<varStr> *data_str = new std::vector<varStr>();
+    std::map<int, int>::iterator it_data_str; // [posição na memoria, index]
+    std::map<int, int> data_index_str;        // [posição na memoria, index]
 
     bool end = false;
 
@@ -156,14 +160,14 @@ void ConvertToX86(std::vector<int> matrix, fileData *file)
         case 15: // S_INPUT
             op1 = matrix[i++];
             op2 = matrix[i++];
-            instruction.text = "push \td" + std::to_string(op1) + "\n\tpush \tword "+ std::to_string(op2) + "\n\tcall sum\n";
-            it_data = data_index.find(op1);
-            if (it_data == data_index.end())
+            instruction.text = "push \td" + std::to_string(op1) + "\n\tpush \tword " + std::to_string(op2) + "\n\tcall sum\n";
+            it_data_str = data_index_str.find(op1);
+            if (it_data_str == data_index_str.end())
             {
-                varInt var = {op1, true, op2};
-                data_index[op1] = data_size;
-                data->push_back(var);
-                data_size++;
+                varStr var = {op1, true, op2};
+                data_index_str[op1] = data_size;
+                data_str->push_back(var);
+                data_str_size++;
             }
             break;
         case 16: // S_OUTPUT
@@ -175,12 +179,12 @@ void ConvertToX86(std::vector<int> matrix, fileData *file)
         if (end)
             break;
     }
-    CreateDataSection(data, s_data, s_bss);
+    CreateDataSection(matrix, data, data_str, s_data, s_bss);
     CreateTextSection(instructions, labels, s_text);
     SaveFile(s_text, s_data, s_bss, file);
 }
 
-void CreateDataSection(std::vector<varInt> *data, std::string *s_data, std::string *s_bss)
+void CreateDataSection(std::vector<int> matrix, std::vector<varInt> *data, std::vector<varStr> *data_str, std::string *s_data, std::string *s_bss)
 {
     for (int i = 0; i < data->size(); i++)
     {
@@ -190,19 +194,34 @@ void CreateDataSection(std::vector<varInt> *data, std::string *s_data, std::stri
         int index = (*data)[i].pos;
         if (isVar)
         {
-            if (val)
-            {
-                command = 'd' + std::to_string(index) + "\t\tresb " + std::to_string(val * 4) + '\n';
-            }
-            else
-            {
-                command = 'd' + std::to_string(index) + "\t\tresb 4" + '\n';
-            }
+            command = 'd' + std::to_string(index) + "\t\tresb 4" + '\n';
             s_bss->append(command);
         }
         else
         {
             command = 'd' + std::to_string(index) + "\t\tdw " + std::to_string(val) + '\n';
+            s_data->append(command);
+        }
+    }
+
+    for (int i = 0; i < data_str->size(); i++)
+    {
+        std::string command;
+        int index = (*data_str)[i].pos;
+        bool isVar = (*data_str)[i].isVar;
+        int size = (*data_str)[i].size;
+        if (isVar)
+        {
+            command = 'd' + std::to_string(index) + "\t\tresb" + std::to_string(size) + '\n';
+            s_bss->append(command);
+        }
+        else
+        {
+            std::string text;
+            for (int j = 0; j < size; j++) {
+                text += (char)matrix[index+j];
+            }
+            command = "db" + text + "0dH, 0aH\n";
             s_data->append(command);
         }
     }
@@ -216,11 +235,10 @@ void CreateTextSection(std::vector<instr> *instructions, std::set<int> *labels, 
 
     // Função de s_input
     s_text->append("s_input:\n\tpush \tebp\n\tmov \tebp, esp\n\tpush \teax\n\tsub \tedx, edx\n\tmov \teax, 3\n\tmov \tebx, 0\n\tmov \tecx, [ebp+10]\n\tmov \tdx, [ebp+8]\n\tint \t80h\n\tpop \teax\n\tpop \tebp\n\tret \t10");
-    
+
     // Função de s_output
     // Função de input
     // Função de output
-
 
     for (int i = 0; i < instructions->size(); i++)
     {

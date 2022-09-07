@@ -24,6 +24,7 @@ struct varInt
 struct varStr
 {
     int pos;
+    bool isVar;
     int size;
 };
 
@@ -35,7 +36,7 @@ struct instr
 
 void ConvertToX86(std::vector<int> matrix, fileData *file);
 
-void CreateDataSection(std::vector<varInt> *data, std::string *s_data, std::string *s_bss);
+void CreateDataSection(std::vector<int> matrix, std::vector<varInt> *data, std::vector<varStr> *data_str, std::string *s_data, std::string *s_bss);
 void CreateTextSection(std::vector<instr> *instructions, std::set<int> *labels, std::string *s_text);
 
 void SaveFile(std::string *s_text, std::string *s_data, std::string *s_bss, fileData *file);
