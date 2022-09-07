@@ -49,9 +49,28 @@ void ConvertToX86(std::vector<int> matrix, fileData *file)
             break;
         case 3: //  MUL
             op1 = matrix[i++];
+            instruction.text = "mov \tebx, [d"+ std::to_string(op1) + "]\n\tcdq\n\timul \tebx\n\tjnc \tl" + std::to_string(i) + "\n\tmov \teax,1\n\tmov \tebx, 0\n\tint \t80h\n";
+            it_data = data_index.find(op1);
+            if (it_data == data_index.end())
+            {
+                varInt var = {op1, false, matrix[op1]};
+                data_index[op1] = data_size;
+                data->push_back(var);
+                data_size++;
+            }
+            labels->insert(i);
             break;
         case 4: // DIV
             op1 = matrix[i++];
+            instruction.text = "mov \tebx, [d" + std::to_string(op1) + "]\n\tcdq\n\tidiv \tebx\n";
+            it_data = data_index.find(op1);
+            if (it_data == data_index.end())
+            {
+                varInt var = {op1, false, matrix[op1]};
+                data_index[op1] = data_size;
+                data->push_back(var);
+                data_size++;
+            }
             break;
         case 5: // JMP
             op1 = matrix[i++];
