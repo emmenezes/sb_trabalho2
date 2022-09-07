@@ -49,7 +49,7 @@ void ConvertToX86(std::vector<int> matrix, fileData *file)
             break;
         case 3: //  MUL
             op1 = matrix[i++];
-            instruction.text = "mov \tebx, [d"+ std::to_string(op1) + "]\n\tcdq\n\timul \tebx\n\tjnc \tl" + std::to_string(i) + "\n\tmov \teax,1\n\tmov \tebx, 0\n\tint \t80h\n";
+            instruction.text = "mov \tebx, [d" + std::to_string(op1) + "]\n\tcdq\n\timul \tebx\n\tjnc \tl" + std::to_string(i) + "\n\tmov \teax,1\n\tmov \tebx, 0\n\tint \t80h\n";
             it_data = data_index.find(op1);
             if (it_data == data_index.end())
             {
@@ -156,6 +156,15 @@ void ConvertToX86(std::vector<int> matrix, fileData *file)
         case 15: // S_INPUT
             op1 = matrix[i++];
             op2 = matrix[i++];
+            instruction.text = "push \td" + std::to_string(op1) + "\n\tpush \tword "+ std::to_string(op2) + "\n\tcall sum\n";
+            it_data = data_index.find(op1);
+            if (it_data == data_index.end())
+            {
+                varInt var = {op1, true, op2};
+                data_index[op1] = data_size;
+                data->push_back(var);
+                data_size++;
+            }
             break;
         case 16: // S_OUTPUT
             op1 = matrix[i++];
@@ -183,7 +192,7 @@ void CreateDataSection(std::vector<varInt> *data, std::string *s_data, std::stri
         {
             if (val)
             {
-                command = 'd' + std::to_string(index) + "\t\tresdw " + std::to_string(val * 4) + '\n';
+                command = 'd' + std::to_string(index) + "\t\tresb " + std::to_string(val * 4) + '\n';
             }
             else
             {
@@ -204,6 +213,14 @@ void CreateTextSection(std::vector<instr> *instructions, std::set<int> *labels, 
     int pos;
     std::string instruction;
     std::set<int>::iterator it;
+
+    // Função de s_input
+    s_text->append("s_input:\n\tpush \tebp\n\tmov \tebp, esp\n\tpush \teax\n\tsub \tedx, edx\n\tmov \teax, 3\n\tmov \tebx, 0\n\tmov \tecx, [ebp+10]\n\tmov \tdx, [ebp+8]\n\tint \t80h\n\tpop \teax\n\tpop \tebp\n\tret \t10");
+    
+    // Função de s_output
+    // Função de input
+    // Função de output
+
 
     for (int i = 0; i < instructions->size(); i++)
     {
