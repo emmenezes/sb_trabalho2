@@ -7,7 +7,7 @@ Equipe:
 
 ## Para compilar
 ```
-g++ tradutor.cpp src/auxiliar.cpp -o tradutor
+g++ tradutor.cpp src/auxiliar.cpp -o tradutor -std=c++11
 ```
 
 ## Para executar
