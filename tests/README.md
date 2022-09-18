@@ -1,7 +1,7 @@
 Lista de testes
-| Nome do arquivo   | Opcode testado | Saida |
+| Nome do arquivo   | Opcodes testados | Saida |
 |-------------------|---|-----------|
-| test_equ1         | X |  |
-| test_equ2         | X |  |
+| test_binary        | 03, 04, 07, 09, 10, 11, 12, 13, 14 | OK |
+| test_suma         | 01, 11, 10, 12, 13, 14 | OK |
 | test_equ3         | X |  |
-| test_equ4         | X |  |
+
