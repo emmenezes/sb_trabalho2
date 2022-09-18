@@ -53,7 +53,12 @@ void ConvertToX86(std::vector<int> matrix, fileData *file)
             break;
         case 3: //  MUL
             op1 = matrix[i++];
-            instruction.text = "mov \tebx, [d" + std::to_string(op1) + "]\n\tcdq\n\timul \tebx\n\tjnc \tl" + std::to_string(i) + "\n\tmov \teax,1\n\tmov \tebx, 0\n\tint \t80h\n";
+            instruction.text = "mov \tebx, [d" + std::to_string(op1) + "]\
+                            \n\timul \tebx\
+                            \n\tjnc \tl" + std::to_string(i) + "\
+                            \n\tmov \teax,1\
+                            \n\tmov \tebx, 0\
+                            \n\tint \t80h\n";
             it_data = data_index.find(op1);
             if (it_data == data_index.end())
             {
@@ -66,7 +71,9 @@ void ConvertToX86(std::vector<int> matrix, fileData *file)
             break;
         case 4: // DIV
             op1 = matrix[i++];
-            instruction.text = "mov \tebx, [d" + std::to_string(op1) + "]\n\tcdq\n\tidiv \tebx\n";
+            instruction.text = "mov \tebx, [d" + std::to_string(op1) + "]\
+                            \n\tcdq\
+                            \n\tidiv \tebx\n";
             it_data = data_index.find(op1);
             if (it_data == data_index.end())
             {
@@ -83,23 +90,27 @@ void ConvertToX86(std::vector<int> matrix, fileData *file)
             break;
         case 6: // JMPN
             op1 = matrix[i++];
-            instruction.text = "cmp \teax, 0\n\tjl \t\tl" + std::to_string(op1) + "\n";
+            instruction.text = "cmp \teax, 0\
+                            \n\tjl \t\tl" + std::to_string(op1) + "\n";
             labels->insert(op1);
             break;
         case 7: // JMPP
             op1 = matrix[i++];
-            instruction.text = "cmp \teax, 0\n\tjg \t\tl" + std::to_string(op1) + "\n";
+            instruction.text = "cmp \teax, 0\
+                            \n\tjg \t\tl" + std::to_string(op1) + "\n";
             labels->insert(op1);
             break;
         case 8: // JPMZ
             op1 = matrix[i++];
-            instruction.text = "cmp \teax, 0\n\tjz \t\tl" + std::to_string(op1) + "\n";
+            instruction.text = "cmp \teax, 0\
+                            \n\tjz \t\tl" + std::to_string(op1) + "\n";
             labels->insert(op1);
             break;
         case 9: // COPY
             op1 = matrix[i++];
             op2 = matrix[i++];
-            instruction.text = "mov \tebx, [d" + std::to_string(op2) + "]\n\tmov \t[d" + std::to_string(op1) + "], ebx\n";
+            instruction.text = "mov \tebx, [d" + std::to_string(op2) + "]\
+                            \n\tmov \t[d" + std::to_string(op1) + "], ebx\n";
 
             it_data = data_index.find(op1);
             if (it_data == data_index.end())
@@ -149,18 +160,48 @@ void ConvertToX86(std::vector<int> matrix, fileData *file)
             break;
         case 12: // INPUT
             op1 = matrix[i++];
+            instruction.text = "push eax\
+                            \n\tpush d" + std::to_string(op1) + "\
+                            \n\tcall INPUT\
+                            \n\rpop eax";
+            it_data = data_index.find(op1);
+            if (it_data == data_index.end())
+            {
+                varInt var = {op1, false, matrix[op1]};
+                data_index[op1] = data_size;
+                data->push_back(var);
+                data_size++;
+            }
             break;
         case 13: // OUTPUT
             op1 = matrix[i++];
+            instruction.text = "push eax\
+                            \n\tpush dword [d" + std::to_string(op1) + "]\
+                            \n\tcall OUTPUT\
+                            \n\rpop eax";
+            it_data = data_index.find(op1);
+            if (it_data == data_index.end())
+            {
+                varInt var = {op1, false, matrix[op1]};
+                data_index[op1] = data_size;
+                data->push_back(var);
+                data_size++;
+            }
             break;
         case 14: // STOP
             end = true;
-            instruction.text = "mov \teax, 1\n\tmov \tebx, 0\n\tint \t80h\n";
+            instruction.text = "mov \teax, 1\
+                            \n\tmov \tebx, 0\
+                            \n\tint \t80h\n";
             break;
         case 15: // S_INPUT
             op1 = matrix[i++];
             op2 = matrix[i++];
-            instruction.text = "push \td" + std::to_string(op1) + "\n\tpush \tword " + std::to_string(op2) + "\n\tcall sum\n";
+            instruction.text = "push eax\
+                            \n\tpush \td" + std::to_string(op1) + "\
+                            \n\tpush \tword " + std::to_string(op2) + "\
+                            \n\tcall S_INPUT\n\
+                            \n\tpop eax";
             it_data_str = data_index_str.find(op1);
             if (it_data_str == data_index_str.end())
             {
@@ -173,6 +214,19 @@ void ConvertToX86(std::vector<int> matrix, fileData *file)
         case 16: // S_OUTPUT
             op1 = matrix[i++];
             op2 = matrix[i++];
+            instruction.text = "push eax\
+                            \n\tpush \td" + std::to_string(op1) + "\
+                            \n\tpush \tword " + std::to_string(op2) + "\
+                            \n\tcall S_OUTPUT\n\
+                            \n\tpop eax";
+            it_data_str = data_index_str.find(op1);
+            if (it_data_str == data_index_str.end())
+            {
+                varStr var = {op1, true, op2};
+                data_index_str[op1] = data_size;
+                data_str->push_back(var);
+                data_str_size++;
+            }
             break;
         }
         instructions->push_back(instruction);
@@ -186,6 +240,13 @@ void ConvertToX86(std::vector<int> matrix, fileData *file)
 
 void CreateDataSection(std::vector<int> matrix, std::vector<varInt> *data, std::vector<varStr> *data_str, std::string *s_data, std::string *s_bss)
 {
+    s_data->append( "msg1\t\tdb\t'Foram lidos/escritos '\
+                    \nMSG1SIZE\tEQU\t$-msg1\
+                    \nmsg2\t\tdb\t' bytes.', 0Dh, 0Ah\
+                    \nMSG2SIZE\tEQU\t$-msg2\
+                    \nnwln\t\tdb\t0Dh, 0Ah\
+                    \nNWLNSIZE\tEQU $-nwln\n\n");
+
     for (int i = 0; i < data->size(); i++)
     {
         bool isVar = (*data)[i].isVar;
@@ -221,7 +282,7 @@ void CreateDataSection(std::vector<int> matrix, std::vector<varInt> *data, std::
             for (int j = 0; j < size; j++) {
                 text += (char)matrix[index+j];
             }
-            command = "db" + text + "0dH, 0aH\n";
+            command = "db \"" + text + "\", 0dH, 0aH\n";
             s_data->append(command);
         }
     }
@@ -233,13 +294,251 @@ void CreateTextSection(std::vector<instr> *instructions, std::set<int> *labels, 
     std::string instruction;
     std::set<int>::iterator it;
 
+    // Funções auxiliares
+    s_text->append( "MSGOUT:\
+                \n\tpush ebp\
+                \n\tmov ebp, esp\
+                \n\tpush ebx\
+                \n\tpush ecx\
+                \n\tpush edx\
+                \n\tpush esi\
+            \n\t\
+                \n\tmov eax, 4\
+                \n\tmov ebx, 1\
+                \n\tmov ecx, msg1\
+                \n\tmov edx, MSG1SIZE\
+                \n\tint 80h\
+            \n\t\
+                \n\tmov eax, [ebp+8]\
+                \n\tsub esp, 12\
+                \n\tmov ecx, esp\
+                \n\tpush eax\
+                \n\tpush ecx\
+                \n\tcall CVTDCHX\
+                \n\tadd esp, 12\
+            \n\t\
+                \n\tmov edx, eax\
+                \n\tmov eax, 4\
+                \n\tmov ebx, 1\
+                \n\tint 80h\
+            \n\t\
+                \n\tmov eax, 4\
+                \n\tmov ebx, 1\
+                \n\tmov ecx, msg2\
+                \n\tmov edx, MSG2SIZE\
+                \n\tint 80h\
+            \n\t\
+                \n\tpop esi\
+                \n\tpop edx\
+                \n\tpop ecx\
+                \n\tpop ebx\
+                \n\tpop ebp\
+                \n\tret 4\
+            \n\t\
+            \nCVTDCHX:\
+                \n\tpush ebp\
+                \n\tmov ebp, esp\
+                \n\tpush ebx\
+                \n\tpush ecx\
+                \n\tpush edx\
+                \n\tpush esi\
+            \n\t\
+                \n\tmov eax, [ebp+12]   ; valor\
+                \n\tmov esi, [ebp+8]    ; ponteiro\
+                \n\tmov byte [esi], 0x0\
+                \n\tpush esi\
+                \n\tcmp eax, 0\
+                \n\tjge CVTS \
+            \n\t\
+                \n\tpop ebx\
+                \n\tmov byte [esi], 0x2d\
+                \n\tinc esi\
+                \n\tpush esi\
+                \n\tmov byte [esi], 0x0\
+                \n\tneg eax\
+            \n\t\
+            \nCVTS:\
+                \n\tcdq\
+                \n\tmov ebx, 10\
+                \n\tidiv ebx\
+                \n\tadd dl, 0x30\
+                \n\t\
+            \nCVTS_LOOP:\
+                \n\tmov cl, [esi]\
+                \n\tcmp cl, 0\
+                \n\tjz CVTS_FIM\
+                \n\tmov byte [esi], dl\
+                \n\tmov dl, cl\
+                \n\tinc esi\
+                \n\tjmp CVTS_LOOP\
+            \n\t\
+            \nCVTS_FIM:\
+                \n\tmov byte [esi], dl\
+                \n\tinc esi\
+                \n\tmov byte [esi], 0x0\
+                \n\tpop esi\
+                \n\tpush esi\
+            \n\t\
+                \n\tcmp eax, 0\
+                \n\tjz CVTDCHX_CNT\
+                \n\tjmp CVTS\
+            \n\t\
+            \nCVTDCHX_CNT:\
+                \n\tpop esi\
+                \n\tmov eax, 0\
+                \n\tmov esi, [ebp+8]\
+            \n\t\
+            \nCVTDCHX_CNT_LOOP:\
+                \n\tcmp byte [esi], 0x0\
+                \n\tjz CVTDCHX_FIM\
+                \n\tinc eax\
+                \n\tinc esi\
+                \n\tjmp CVTDCHX_CNT_LOOP\
+            \n\t\
+            \nCVTDCHX_FIM:\
+                \n\tpop esi\
+                \n\tpop edx\
+                \n\tpop ecx\
+                \n\tpop ebx\
+                \n\tpop ebp\
+                \n\tret 8\n\n");
+
     // Função de s_input
-    s_text->append("s_input:\n\tpush \tebp\n\tmov \tebp, esp\n\tpush \teax\n\tsub \tedx, edx\n\tmov \teax, 3\n\tmov \tebx, 0\n\tmov \tecx, [ebp+10]\n\tmov \tdx, [ebp+8]\n\tint \t80h\n\tpop \teax\n\tpop \tebp\n\tret \t10");
+    s_text->append( "S_INPUT:\
+                \n\tpush ebp\
+                \n\tmov ebp, esp\
+                \n\tsub edx, edx\
+                \n\t\
+                \n\tmov eax, 3\
+                \n\tmov ebx, 0\
+                \n\tmov ecx, [ebp+10]\
+                \n\tmov dx, [ebp+8]\
+                \n\tint 80h\
+                \n\t\
+                \n\tpush eax\
+                \n\tpush eax\
+                \n\tcall MSGOUT\
+                \n\tpop eax\
+                \n\t\
+                \n\tpop ebp\
+                \n\tret 10\n\n");
 
     // Função de s_output
+    s_text->append("S_OUTPUT:\
+                \n\tpush ebp\
+                \n\tmov ebp, esp\
+                \n\tsub edx, edx\
+            \n\t\
+                \n\tmov eax, 4\
+                \n\tmov ebx, 1\
+                \n\tmov ecx, [ebp+10]\
+                \n\tmov dx, [ebp+8]\
+                \n\tint 80h\
+            \n\t\
+                \n\tpush eax\
+                \n\tpush eax\
+                \n\tcall MSGOUT\
+                \n\tpop eax\
+            \n\t\
+                \n\tpop ebp\
+                \n\tret 10\n\n");
+    
     // Função de input
-    // Função de output
+    s_text->append("INPUT:\
+                \n\tpush ebp\
+                \n\tmov ebp, esp\
+            \n\t\
+                \n\tsub esp, 12\
+                \n\tmov ecx, esp\
+            \n\t\
+                \n\tmov eax, 3\
+                \n\tmov ebx, 0\
+                \n\tmov edx, 12\
+                \n\tint 80h\
+            \n\t\
+                \n\tpush eax\
+                \n\tpush eax\
+                \n\tcall MSGOUT\
+                \n\tpop eax\
+                \n\tpush eax\
+            \n\t\
+                \n\tsub ebx, ebx\
+                \n\tmov edx, ecx\
+                \n\tmov ecx, eax\
+                \n\tmov esi, 0\
+                \n\tmov eax, 0\
+            \n\t\
+                \n\tmov bl, [edx]\
+                \n\tdec ecx\
+                \n\tcmp bl, 0x2d\
+                \n\tjne INPUT_COUNT\
+                \n\tmov esi, 1\
+                \n\tinc edx\
+                \n\tdec ecx\
+            \n\t\
+            \nINPUT_COUNT:\
+                \n\tmov bl, [edx]\
+                \n\tinc edx\
+                \n\tsub bl, 0x30\
+            \n\t\
+                \n\tpush ebx\
+                \n\tshl eax, 1\
+                \n\tmov ebx, eax\
+                \n\tshl eax, 2\
+                \n\tadd eax, ebx\
+                \n\tpop ebx\
+                \n\tadd eax, ebx\
+                \n\tloop INPUT_COUNT\
+            \n\t\
+                \n\tcmp esi, 0\
+                \n\tjz INPUT_FIM\
+                \n\tneg eax\
+            \n\t\
+            \nINPUT_FIM:\
+                \n\tmov ebx, [ebp+8]\
+                \n\tmov [ebx], eax\
+                \n\tpop eax\
+                \n\tadd esp, 12\
+                \n\tpop ebp\
+                \n\tret 4\n\n");
 
+    // Função de output
+    s_text->append("OUTPUT:\
+                \n\tpush ebp\
+                \n\tmov ebp, esp\
+            \n\t\
+                \n\tmov eax, [ebp+8]\
+            \n\t\
+                \n\tsub esp, 12\
+                \n\tmov ecx, esp\
+                \n\tpush eax\
+                \n\tpush ecx\
+                \n\tcall CVTDCHX\
+                \n\tpush eax\
+                \n\tpush eax\
+            \n\t\
+                \n\tmov edx, eax\
+                \n\tmov eax, 4\
+                \n\tmov ebx, 1\
+                \n\tint 80h\
+            \n\t\
+                \n\tmov eax, 4\
+                \n\tmov ebx, 1\
+                \n\tmov ecx, nwln\
+                \n\tmov edx, NWLNSIZE\
+                \n\tint 80h\
+            \n\t\
+                \n\tcall MSGOUT\
+            \n\t\
+                \n\tpop eax\
+                \n\tadd esp, 12\
+                \n\tpop ebp\
+                \n\tret 4\n\n");
+
+    // Label de _start
+    s_text->append("\n_start:\n");
+
+    // Instruções do programa
     for (int i = 0; i < instructions->size(); i++)
     {
         pos = (*instructions)[i].pos;
@@ -266,7 +565,7 @@ void SaveFile(std::string *s_text, std::string *s_data, std::string *s_bss, file
     program.append("\nsection .bss\n");
     program.append(*s_bss);
 
-    program.append("\nsection .text\nglobal_start\n_start:\n");
+    program.append("\nsection .text\nglobal _start\n");
     program.append(*s_text);
 
     file->content = program;
