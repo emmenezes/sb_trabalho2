@@ -260,7 +260,7 @@ void CreateDataSection(std::vector<int> matrix, std::vector<varInt> *data, std::
         }
         else
         {
-            command = 'd' + std::to_string(index) + "\t\tdw " + std::to_string(val) + '\n';
+            command = 'd' + std::to_string(index) + "\t\tdd " + std::to_string(val) + '\n';
             s_data->append(command);
         }
     }
