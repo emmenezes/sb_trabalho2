@@ -273,7 +273,7 @@ void CreateDataSection(std::vector<int> matrix, std::vector<varInt> *data, std::
         int size = (*data_str)[i].size;
         if (isVar)
         {
-            command = 'd' + std::to_string(index) + "\t\tresb" + std::to_string(size) + '\n';
+            command = 'd' + std::to_string(index) + "\t\tresb " + std::to_string(size) + '\n'; //arrumado resb_
             s_bss->append(command);
         }
         else
