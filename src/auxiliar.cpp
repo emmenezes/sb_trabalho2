@@ -163,7 +163,7 @@ void ConvertToX86(std::vector<int> matrix, fileData *file)
             instruction.text = "push eax\
                             \n\tpush d" + std::to_string(op1) + "\
                             \n\tcall INPUT\
-                            \n\rpop eax";
+                            \n\rpop eax\n";
             it_data = data_index.find(op1);
             if (it_data == data_index.end())
             {
@@ -178,7 +178,7 @@ void ConvertToX86(std::vector<int> matrix, fileData *file)
             instruction.text = "push eax\
                             \n\tpush dword [d" + std::to_string(op1) + "]\
                             \n\tcall OUTPUT\
-                            \n\rpop eax";
+                            \n\rpop eax\n";
             it_data = data_index.find(op1);
             if (it_data == data_index.end())
             {
@@ -201,7 +201,7 @@ void ConvertToX86(std::vector<int> matrix, fileData *file)
                             \n\tpush \td" + std::to_string(op1) + "\
                             \n\tpush \tword " + std::to_string(op2) + "\
                             \n\tcall S_INPUT\n\
-                            \n\tpop eax\n"; /* mudanca*/
+                            \n\tpop eax\n";
             it_data_str = data_index_str.find(op1);
             if (it_data_str == data_index_str.end())
             {
@@ -218,7 +218,7 @@ void ConvertToX86(std::vector<int> matrix, fileData *file)
                             \n\tpush \td" + std::to_string(op1) + "\
                             \n\tpush \tword " + std::to_string(op2) + "\
                             \n\tcall S_OUTPUT\n\
-                            \n\tpop eax\n"; /* mudanca*/
+                            \n\tpop eax\n";
             it_data_str = data_index_str.find(op1);
             if (it_data_str == data_index_str.end())
             {
