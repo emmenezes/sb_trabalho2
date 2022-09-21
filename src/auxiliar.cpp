@@ -109,8 +109,8 @@ void ConvertToX86(std::vector<int> matrix, fileData *file)
         case 9: // COPY
             op1 = matrix[i++];
             op2 = matrix[i++];
-            instruction.text = "mov \tebx, [d" + std::to_string(op2) + "]\
-                            \n\tmov \t[d" + std::to_string(op1) + "], ebx\n";
+            instruction.text = "mov \tebx, [d" + std::to_string(op1) + "]\
+                            \n\tmov \t[d" + std::to_string(op2) + "], ebx\n";
 
             it_data = data_index.find(op1);
             if (it_data == data_index.end())
